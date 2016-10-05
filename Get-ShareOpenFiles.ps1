@@ -1,10 +1,11 @@
 $currentsessions = Get-SMBSession
-$date = Get-Date
-$outputobject = @()
+$date = get-date -Format dd-MM-yyyy-hh-mm
 
-foreach $session in $currentsessions {
-	$openfiles = Get-SMBOpenFile -SessionId $session.SessionId
-    $outputobject += $openfiles
+ECHO "Path;Computer;User;" > .\$date.csv
+
+foreach ($session in $currentsessions) {
+    $openfiles = Get-SMBOpenFile -SessionId $session.SessionId -ErrorAction SilentlyContinue
+    foreach ($file in $openfiles) {
+        ECHO "$($file.Path);$($file.ClientComputerName);$($file.ClientUserName);" >> .\$date.csv
+    }
 }
-
-Export-CSV -Delimiter ";" -InputObject $outputobject -Path $date.csv
